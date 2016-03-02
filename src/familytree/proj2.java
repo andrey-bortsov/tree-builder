@@ -1,78 +1,166 @@
 package familytree;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.LinkedList;
-import java.util.Scanner;
 
+/**
+ * This program builds a general tree using preorder and postorder 
+ * traversals, and determines the relationship between any two nodes.
+ * @author bortsov
+ */
 public class proj2 {
-	
-	public static final String BEGIN_PREORDER_LINE = "<";
-	public static final String BEGIN_POSTORDER_LINE = ">";
-	public static char[] pretrav;
-	public static char[] posttrav;
-	FamilyTree ft;
+	/** Character denoting beginning of the preorder traversal sequence */
+	public static final char PREORDER_MARK = '<';
+	/** Character denoting beginning of the postorder traversal sequence */
+	public static final char POSTORDER_MARK = '>';
+	/** Character denoting beginning of the query */
+	public static final char QUERY_MARK = '?';
+	/** Preorder traversal */
+	private static char[] pretrav;
+	/** Postorder traversal */
+	private static char[] posttrav;
+	/**  Tree object */
+	private FamilyTree ft;
 
-	public static void main(String[] args) {
-		Scanner sc = new Scanner(System.in);
+	public static void main(String[] args) throws IOException {
+		BufferedReader reader = new BufferedReader(new FileReader("E:\\WORKFOLDERS\\CSC_316\\Projects\\P2\\temp\\medium-input.txt"));
 		proj2 ftb = new proj2();
-		ftb.readPreorder(sc);
-		ftb.readPostorder(sc);
+		ftb.readPreorder(reader);
+		ftb.readPostorder(reader);
 		ftb.ft.mainRoot = ftb.ft.buildTree(pretrav.length, 0, 0);
-		
-
+		String queryString = "";
+		while(queryString != null){
+			queryString = reader.readLine();
+			char[] pair = ftb.readQuery(queryString);
+			if(pair != null){
+			ftb.ft.printRelationship(ftb.ft.lookup(pair[0], ftb.ft.mainRoot), 
+					                 ftb.ft.lookup(pair[1], ftb.ft.mainRoot));
+			}
+		}
+		ftb.ft.traverseLevelOrder(ftb.ft.mainRoot);
 	}
 	
+	/**
+	 * Constructor for proj2 class
+	 */
 	public proj2(){
 		ft = new FamilyTree();
 	}
 	
-	private void readPreorder(Scanner sc){
-		if(sc.hasNext()){
-			String s = sc.next();
-			if(s.equals(BEGIN_PREORDER_LINE)){
-				String preorder = sc.nextLine();
-				int j = 0;
-				for(int i = 0; i < preorder.length(); i++){
-					char c = preorder.charAt(i);
-					if(c != ',' && c != ' ' && c != '.'){
-						pretrav[j] = c;
-						j++;
-					}
+	/**
+	 * Read the preorder sequence into an array.
+	 * Correct format begins with '<', names are single characters comma-separated,
+	 * and end with a period. May span more than one line.
+	 * @param br BufferedReader input
+	 * @throws IOException
+	 */
+	public void readPreorder(BufferedReader br) throws IOException{
+		if(br.ready()){
+			char c = (char) br.read();
+			while(c != PREORDER_MARK){
+				c = (char) br.read();
+			}
+			char[] temp = new char[256];
+			int j = 0;
+			while(c != '.'){
+				if(c != ',' && c != ' ' && c != '\t' && c != '<' && c != '>' && c != '\n' && c != '\r'){
+					temp[j] = c;
+					j++;
 				}
+				c = (char) br.read();
+		    }
+			pretrav = new char[j];
+			for(int i = 0; i < j; i++){
+				pretrav[i] = temp[i];
+			}
+		}
+	}
+
+			
+	/**
+	 * Read the preorder sequence into an array.
+	 * Correct format begins with '>', names are single characters comma-separated,
+	 * and end with a period. May span more than one line.
+	 * @param br BufferedReader input
+	 * @throws IOException
+	 */
+	public void readPostorder(BufferedReader br) throws IOException{
+		if(br.ready()){
+			char c = (char) br.read();
+			while(c != POSTORDER_MARK){
+				c = (char) br.read();
+			}
+			char[] temp = new char[256];
+			int j = 0;
+			while(c != '.'){
+				if(c != ',' && c != ' ' && c != '\t' && c != '<' && c != '>' && c != '\n' && c != '\r'){
+					temp[j] = c;
+					j++;
+				}
+				c = (char) br.read();
+		    }
+			posttrav = new char[j];
+			for(int i = 0; i < j; i++){
+				posttrav[i] = temp[i];
 			}
 		}
 	}
 	
-	private void readPostorder(Scanner sc){
-		if(sc.hasNext()){
-			String s = sc.next();
-			if(s.equals(BEGIN_POSTORDER_LINE)){
-				String postorder = sc.nextLine();
+	/**
+	 * Read the preorder sequence into an array.
+	 * Correct format begins with '?', followed by two names single characters comma-separated,
+	 * and end with a period.
+	 * @param s String input
+	 * @return a character array of two names
+	 */
+	public char[] readQuery(String s){
+		if(s != null && !s.isEmpty()){
+				char[] pair = new char[2];
 				int j = 0;
-				for(int i = 0; i < postorder.length(); i++){
-					char c = postorder.charAt(i);
-					if(c != ',' && c != ' ' && c != '.'){
-						posttrav[j] = c;
-						j++;
+				for(int i = 0; i < s.length(); i++){
+					char c = s.charAt(i);
+					if(c != ',' && c != ' ' && c != '\t' && c != '?' && c != '.'){
+						pair[j] = c;
+						j += 1;
 					}
 				}
+				
+				return pair;
 			}
-		}
+		return null;
 	}
 	
-	public class FamilyTree{
+	/**
+	 * Inner class for the tree object
+	 */
+	private class FamilyTree{
 		public int size;
 		public Node mainRoot;
 		
+		/**
+		 * Inner class for the tree node.
+		 */
 		public class Node{
-			public char name;
-			public Node[] offspring;
-			public int nChildren;
-			public Node parent;
-			public int mark;
+			/**Character name*/
+			private char name;
+			/** Array for node's children */
+			private Node[] offspring;
+			/** Number of node's children */
+			private int nChildren;
+			/** Reference to parent */
+			private Node parent;
+			/** Mark used to determine relationship */
+			private int mark;
 			
+			/**
+			 * Node constructor
+			 * @param e Character name
+			 */
 			public Node(char e){
 				name = e;
-				offspring = new Node[256]; // set to tree size - 1
+				offspring = new Node[pretrav.length - 1];
 				nChildren = 0;
 				mark = -1;
 			}
@@ -111,6 +199,9 @@ public class proj2 {
 				return mark;
 			}
 			
+			public int getNchildren(){
+				return nChildren;
+			}
 
 		}
 		
@@ -120,9 +211,9 @@ public class proj2 {
 			}else{
 				Node node = null;
 				Node[] children = root.getOffspring();
-				for(int i = 0; i < root.nChildren; i++){
-					Node root1 = children[i];
-					node = lookup(e, root1);
+				for(int i = 0; i < root.getNchildren(); i++){
+					Node rootSubtree = children[i];
+					node = lookup(e, rootSubtree);
 					if(node != null){
 						return node;
 					}
@@ -132,7 +223,7 @@ public class proj2 {
 		}
 		
 		
-		public int[] relate(Node a, Node b){
+		private int[] relate(Node a, Node b){
 			if(a.getName() == b.getName()){
 				return new int[] {0, 0};
 			}
@@ -171,25 +262,36 @@ public class proj2 {
 			}else if(first == 0 && second == 3){
 				relation = "'s great grandparent";
 			}else if(first == 0 && second > 3 ){
-				relation = "'s (great)^" + (second - 2) + " grandparent";
-			}else if(first == 0 && second == 0){
-				relation = "...";
-			}else if(first == 0 && second == 0){
-				relation = "...";
-			}else if(first == 0 && second == 0){
-				relation = "...";
-			}else if(first == 0 && second == 0){
-				relation = "...";
-			}else if(first == 0 && second == 0){
-				relation = "...";
+				relation = "'s (great)^" + (second - 2) + "-grandparent";
+			}else if(first == 1 && second == 0){
+				relation = "'s child";
+			}else if(first == 2 && second == 0){
+				relation = "'s grandchild";
+			}else if(first >  2 && second == 0){
+				relation = "'s (great)^" + (first - 2) + "-grandchild";
+			}else if(first == 1 && second == 1){
+				relation = "'s sibling";
+			}else if(first == 1 && second == 2){
+				relation = "'s aunt/uncle";
+			}else if(first == 1 && second >  2){
+				relation = "'s (great)^" + (second - 2) + "-aunt/uncle";
+			}else if(first == 2 && second == 1){
+				relation = "'s niece/nephew";
+			}else if(first >  2 && second == 1){
+				relation = "'s (great)^" + (first - 2) + "-niece/nephew";
+			}else if(first >  1 && second >  1){
+				relation = "'s " + (Math.min(first, second) - 1) + 
+						"th cousin " + Math.abs(first - second) + " times removed";
 			}
 			
 			System.out.println(a.getName() + " is " + b.getName() + relation);
+			clearMarks(a);
+			clearMarks(b);
 		}
 		
 		
 		
-		public void clearMarks(Node a){
+		private void clearMarks(Node a){
 			while(a.getParent() != null){
 				a.uncheckMark();
 				a = a.getParent();		
@@ -220,25 +322,22 @@ public class proj2 {
 		}
 		
 		public void traverseLevelOrder(Node p){
-			LinkedList<Node> myQueue = new LinkedList<Node>();
-			myQueue.add(p);
+			LinkedList<Node> helperQueue = new LinkedList<Node>();
+			helperQueue.add(p);
 			Node q;
 			String sep = ", ";
-			while(!myQueue.isEmpty()){
-				q = myQueue.remove();
+			while(!helperQueue.isEmpty()){
+				q = helperQueue.remove();
 				Node[] off = q.getOffspring();
-				for(int i = 0; i < q.nChildren; i++){
-					myQueue.add(off[i]);
+				for(int i = 0; i < q.getNchildren(); i++){
+					helperQueue.add(off[i]);
 				}
-				if(myQueue.isEmpty()){
+				if(helperQueue.isEmpty()){
 					sep = ".";
 				}
 				System.out.print(q.getName() + sep);
 			}
-		}
-		
-		
-		 
+		}		 
 		
 	}
 

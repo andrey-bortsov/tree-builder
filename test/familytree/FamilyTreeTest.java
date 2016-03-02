@@ -34,24 +34,24 @@ public class FamilyTreeTest {
 		
 		
 		assertEquals(ftb.ft.mainRoot.getName(), 'D');
-		assertEquals(ftb.ft.mainRoot.nChildren, 2);
-		assertEquals(ftb.ft.mainRoot.offspring[0].offspring[0].offspring[2].getName(), 'W');
-		assertEquals(ftb.ft.mainRoot.offspring[0].offspring[0].offspring[2].getParent().getParent().getName(), 'H');
+		assertEquals(ftb.ft.mainRoot.getNchildren(), 2);
+		assertEquals(ftb.ft.mainRoot.getOffspring()[0].getOffspring()[0].getOffspring()[2].getName(), 'W');
+		assertEquals(ftb.ft.mainRoot.getOffspring()[0].getOffspring()[0].getOffspring()[2].getParent().getParent().getName(), 'H');
 	}
 	
 	@Test
 	public void testLookup(){
 		n = ftb.ft.lookup('Z', ftb.ft.mainRoot);
-		assertEquals(n.nChildren, 0);
+		assertEquals(n.getNchildren(), 0);
 		
 		n = ftb.ft.lookup('B', ftb.ft.mainRoot);
-		assertEquals(n.nChildren, 4);
+		assertEquals(n.getNchildren(), 4);
 		
 		n = ftb.ft.lookup('H', ftb.ft.mainRoot);
-		assertEquals(n.nChildren, 3);
+		assertEquals(n.getNchildren(), 3);
 		
 		n = ftb.ft.lookup('Q', ftb.ft.mainRoot);
-		assertEquals(n.nChildren, 1);
+		assertEquals(n.getNchildren(), 1);
 	}
 	
 	@Test
