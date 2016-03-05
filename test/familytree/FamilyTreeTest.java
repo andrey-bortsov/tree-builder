@@ -5,13 +5,13 @@ import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 
-import familytree.proj2.FamilyTree;
-import familytree.proj2.FamilyTree.Node;
+import familytree.FamilyTreeBuilder.FamilyTree;
+import familytree.FamilyTreeBuilder.FamilyTree.Node;
 
 
 public class FamilyTreeTest {
 	
-	proj2 ftb;
+	FamilyTreeBuilder ftb;
 
 	char[] pre = {'D', 'H', 'B', 'G', 'M', 'W', 'F', 'T', 'X', 'Z', 'C', 'R', 'P', 'Q', 'N'};
 	char[] post = {'G', 'M', 'W', 'F', 'B', 'X', 'Z', 'T', 'R', 'P', 'C', 'H', 'N', 'Q', 'D'};
